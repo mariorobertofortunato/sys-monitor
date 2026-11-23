@@ -192,6 +192,7 @@ Open **Extensions → System Monitor → Settings** to customize:
 |---------|-------------|---------|
 | Refresh interval | Update frequency (1-10 seconds) | 2s |
 | Monochrome mode | Use one neutral color instead of status colors | Disabled |
+| Compact Mode | Remove panel separators and reduce popup spacing/card styling | Disabled |
 | Show values | Show numbers next to the panel icons | Enabled |
 | Panel: CPU | Display CPU usage in the panel | Enabled |
 | Panel: RAM | Display RAM usage in the panel | Enabled |

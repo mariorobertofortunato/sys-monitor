@@ -37,6 +37,13 @@ export default class SysMonPreferences extends ExtensionPreferences {
         settings.bind('monochrome-mode', monochromeRow, 'active', Gio.SettingsBindFlags.DEFAULT);
         generalGroup.add(monochromeRow);
 
+        const compactRow = new Adw.SwitchRow({
+            title: _('Compact Mode'),
+            subtitle: _('Remove panel separators and reduce popup spacing.'),
+        });
+        settings.bind('compact-mode', compactRow, 'active', Gio.SettingsBindFlags.DEFAULT);
+        generalGroup.add(compactRow);
+
         page.add(generalGroup);
 
         const panelGroup = new Adw.PreferencesGroup({

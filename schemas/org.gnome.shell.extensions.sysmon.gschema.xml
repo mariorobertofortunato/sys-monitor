@@ -10,6 +10,10 @@
       <default>false</default>
       <summary>Use monochrome indicators</summary>
     </key>
+    <key name="compact-mode" type="b">
+      <default>false</default>
+      <summary>Use a compact panel and popup layout</summary>
+    </key>
     <key name="panel-show-values" type="b">
       <default>true</default>
       <summary>Show metric values in the panel</summary>

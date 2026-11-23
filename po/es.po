@@ -103,6 +103,14 @@ msgstr "Los valores bajos actualizan más rápido y usan algo más de CPU."
 msgid "Monochrome mode"
 msgstr "Modo monocromo"
 
+#: prefs.js prefsLegacy.js
+msgid "Compact Mode"
+msgstr "Modo compacto"
+
+#: prefs.js
+msgid "Remove panel separators and reduce popup spacing."
+msgstr "Quita los separadores del panel y reduce el espaciado del desplegable."
+
 #: prefs.js
 msgid "Use one neutral color instead of status colors."
 msgstr "Usa un color neutro en vez de los colores de estado."

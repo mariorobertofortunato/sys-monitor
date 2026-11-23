@@ -82,6 +82,7 @@ class Preferences {
         frame.pack_start(intervalBox, false, false, 0);
 
         this._addSwitch(frame, 'monochrome-mode', _('Monochrome mode'));
+        this._addSwitch(frame, 'compact-mode', _('Compact Mode'));
 
         this._addSection(frame, _('Panel'));
 

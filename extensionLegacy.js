@@ -426,23 +426,17 @@ const THEME_ICON_FALLBACK = {
 };
 
 function makeIconBadge(ext, iconName, tone, size = 'metric') {
-    const isMetric = size === 'metric';
-    const wrapPx = isMetric ? 40 : 28;
-    const iconPx = isMetric ? 22 : 16;
-    const wrapClass = isMetric ? 'sysmon-metric-icon-wrap' : 'sysmon-net-icon-wrap';
-    const iconClass = isMetric ? 'sysmon-metric-icon' : 'sysmon-net-icon';
+    const wrapClass = size === 'metric' ? 'sysmon-metric-icon-wrap' : 'sysmon-net-icon-wrap';
+    const iconClass = size === 'metric' ? 'sysmon-metric-icon' : 'sysmon-net-icon';
 
     const wrap = new St.Widget({
         style_class: `${wrapClass} tone-${tone}`,
-        width: wrapPx,
-        height: wrapPx,
         y_align: Clutter.ActorAlign.CENTER,
     });
     wrap.set_layout_manager(new Clutter.BinLayout());
 
     const icon = new St.Icon({
         style_class: `${iconClass} tone-${tone}`,
-        icon_size: iconPx,
         x_align: Clutter.ActorAlign.CENTER,
         y_align: Clutter.ActorAlign.CENTER,
     });
@@ -485,19 +479,23 @@ function makeSparkline(color, width = 108, height = 30) {
     const canvas = new St.DrawingArea({ width, height, x_align: Clutter.ActorAlign.END });
     canvas._history = [];
     canvas._color = color;
+    canvas._chartWidth = width;
+    canvas._chartHeight = height;
     canvas._maxPoints = CHART_POINTS;
     canvas.connect('repaint', area => {
         const cr = area.get_context();
         const history = canvas._history;
+        const chartWidth = area.get_width() || canvas._chartWidth;
+        const chartHeight = canvas._chartHeight;
         if (history.length < 2) { cr.$dispose(); return; }
         const max = Math.max(...history, 1);
         const offset = canvas._maxPoints - history.length;
-        const step = width / (canvas._maxPoints - 1);
+        const step = chartWidth / (canvas._maxPoints - 1);
         const [r, g, b] = rgbaFromHex(canvas._color);
-        cr.moveTo(offset * step, height - (history[0] / max) * (height - 6) - 3);
+        cr.moveTo(offset * step, chartHeight - (history[0] / max) * (chartHeight - 6) - 3);
         for (let i = 1; i < history.length; i++) {
             const x = (offset + i) * step;
-            const y = height - (history[i] / max) * (height - 6) - 3;
+            const y = chartHeight - (history[i] / max) * (chartHeight - 6) - 3;
             cr.lineTo(x, y);
         }
         cr.setSourceRGBA(r, g, b, 0.92);
@@ -512,23 +510,25 @@ function makeWaveChart(color, height = 52) {
     const canvas = new St.DrawingArea({ height, x_expand: true });
     canvas._history = [];
     canvas._color = color;
+    canvas._chartHeight = height;
     canvas._maxPoints = CHART_POINTS;
     canvas.connect('repaint', area => {
         const cr = area.get_context();
         const history = canvas._history;
         const width = area.get_width() || 148;
+        const chartHeight = canvas._chartHeight;
         if (history.length < 2) { cr.$dispose(); return; }
         const max = Math.max(...history, 1);
         const offset = canvas._maxPoints - history.length;
         const step = width / (canvas._maxPoints - 1);
         const [r, g, b] = rgbaFromHex(canvas._color);
-        const yAt = index => height - (history[index] / max) * (height - 10) - 5;
+        const yAt = index => chartHeight - (history[index] / max) * (chartHeight - 10) - 5;
         const xAt = index => (offset + index) * step;
-        cr.moveTo(xAt(0), height);
+        cr.moveTo(xAt(0), chartHeight);
         cr.lineTo(xAt(0), yAt(0));
         for (let i = 1; i < history.length; i++)
             cr.lineTo(xAt(i), yAt(i));
-        cr.lineTo(xAt(history.length - 1), height);
+        cr.lineTo(xAt(history.length - 1), chartHeight);
         cr.closePath();
         cr.setSourceRGBA(r, g, b, 0.28);
         cr.fill();
@@ -567,6 +567,7 @@ function makeWaveChart(color, height = 52) {
          this._lastData = null;
          this._settingsChangedIds = [
              'monochrome-mode',
+             'compact-mode',
              'panel-show-values',
              'show-cpu',
              'show-ram',
@@ -578,6 +579,8 @@ function makeWaveChart(color, height = 52) {
              'popup-show-swap',
              'popup-show-network',
          ].map(key => this._settings.connect(`changed::${key}`, () => {
+             if (key === 'compact-mode')
+                 this._syncCompactMode();
              if (this._lastData)
                  this.update(this._lastData);
              else
@@ -592,8 +595,8 @@ function makeWaveChart(color, height = 52) {
         this._cpuGroup = this._makePanelMetric('cpu', '0%', 'color-normal', 34);
         this._ramGroup = this._makePanelMetric('ram', '0%', 'color-normal', 34);
         this._swapGroup = this._makePanelMetric('swap', '0%', 'color-normal', 34);
-        this._upGroup = this._makePanelMetric('upload', '0KB/s', 'color-up', 58);
-        this._downGroup = this._makePanelMetric('download', '0KB/s', 'color-down', 58);
+        this._upGroup = this._makePanelMetric('upload', '0KB/s', 'color-up');
+        this._downGroup = this._makePanelMetric('download', '0KB/s', 'color-down');
 
          const sep = () => {
              const label = new St.Label({
@@ -627,7 +630,35 @@ function makeWaveChart(color, height = 52) {
          this._buildPopup();
         this.menu.actor.add_style_class_name('sysmon-popup-menu');
         this.menu.actor.set_width(360);
+        this._syncCompactMode();
         this._syncVisibility();
+    }
+
+    _syncCompactMode() {
+        const compact = this._settings.get_boolean('compact-mode');
+        for (const actor of [this._panelBox, this.menu.actor]) {
+            if (compact)
+                actor.add_style_class_name('sysmon-compact');
+            else
+                actor.remove_style_class_name('sysmon-compact');
+        }
+        this.menu.actor.set_width(compact ? 320 : 360);
+
+        for (const card of [this._upCard, this._downCard]) {
+            const height = compact ? 24 : 52;
+            card.wave._chartHeight = height;
+            card.wave.set_height(height);
+            card.wave.queue_repaint();
+        }
+
+        for (const card of [this._cpuItem, this._gpuItem, this._ramItem, this._swapItem]) {
+            const width = compact ? 72 : 108;
+            const height = compact ? 20 : 30;
+            card.sparkline._chartWidth = width;
+            card.sparkline._chartHeight = height;
+            card.sparkline.set_size(width, height);
+            card.sparkline.queue_repaint();
+        }
     }
 
     _buildPopup() {
@@ -699,7 +730,7 @@ function makeWaveChart(color, height = 52) {
          card.add_child(body);
          card.add_child(rightCol);
          item.add_child(card);
-         return { item, detailLbl, pctLbl, tempLbl, sparkline, accentColor: theme.color, tone: theme.tone };
+         return { item, iconWrap, detailLbl, pctLbl, tempLbl, sparkline, accentColor: theme.color, tone: theme.tone };
      }
 
     _makePanelMetric(iconName, valueText, valueClass, valueWidth) {
@@ -716,7 +747,8 @@ function makeWaveChart(color, height = 52) {
             y_align: Clutter.ActorAlign.CENTER,
             x_align: Clutter.ActorAlign.START,
         });
-        value.set_width(valueWidth);
+        if (valueWidth)
+            value.set_width(valueWidth);
         box.add_child(value);
         return { box, icon, value };
     }
@@ -724,7 +756,8 @@ function makeWaveChart(color, height = 52) {
      _makeNetCard(title, iconName, accentColor, tone) {
          const box = new St.BoxLayout({ vertical: true, x_expand: true, style_class: 'sysmon-net-card' });
          const top = new St.BoxLayout({ vertical: false, style_class: 'sysmon-net-top' });
-         top.add_child(makeIconBadge(this._ext, iconName, tone, 'net'));
+         const iconWrap = makeIconBadge(this._ext, iconName, tone, 'net');
+         top.add_child(iconWrap);
          top.add_child(new St.Label({ text: title, style_class: 'sysmon-net-label' }));
 
          const valRow = new St.BoxLayout({ vertical: false, style_class: 'sysmon-net-value-row' });
@@ -737,7 +770,7 @@ function makeWaveChart(color, height = 52) {
          box.add_child(top);
          box.add_child(valRow);
          box.add_child(wave);
-         return { box, val, unit, wave, accentColor };
+         return { box, iconWrap, val, unit, wave, accentColor };
      }
 
      update(data) {
@@ -844,6 +877,7 @@ function makeWaveChart(color, height = 52) {
      }
 
      _syncVisibility() {
+         const compact = this._settings.get_boolean('compact-mode');
          const showCpu = this._settings.get_boolean('show-cpu');
          const showRam = this._settings.get_boolean('show-ram');
          const showSwap = this._settings.get_boolean('show-swap');
@@ -869,10 +903,10 @@ function makeWaveChart(color, height = 52) {
          this._upGroup.value.visible = showValues;
          this._downGroup.value.visible = showValues;
 
-         this._cpuRamSep.visible = showValues && showCpu && showRam;
-         this._swapSep.visible = showValues && showSwap && (showCpu || showRam);
-         this._netSep.visible = showValues && showNetwork && (showCpu || showRam || showSwap);
-         this._upDownSep.visible = showValues && showNetwork;
+         this._cpuRamSep.visible = !compact && showValues && showCpu && showRam;
+         this._swapSep.visible = !compact && showValues && showSwap && (showCpu || showRam);
+         this._netSep.visible = !compact && showValues && showNetwork && (showCpu || showRam || showSwap);
+         this._upDownSep.visible = !compact && showValues && showNetwork;
 
          this._cpuItem.item.visible = popupCpu;
          this._ramItem.item.visible = popupRam;
