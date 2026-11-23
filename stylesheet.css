@@ -5,6 +5,7 @@
     background-color: transparent;
     border: none;
     box-shadow: none;
+    -st-valign: center;
 }
 
 .sysmon-panel-metric {
@@ -14,18 +15,18 @@
 }
 
 .sysmon-panel-box.sysmon-compact {
-    gap: 6px;
-    align-items: center;
+    padding: 0px;
+    spacing: 12px;
 }
 
 .sysmon-panel-box.sysmon-compact .sysmon-panel-metric {
-    gap: 2px;
-    align-items: center;
+    padding: 0px;
+    spacing: 2px;
 }
 
 .sysmon-panel-icon {
-    icon-size: 14px;
-    min-width: 14px;
+    width: 14px;
+    height: 14px;
     -st-icon-style: symbolic;
 }
 
@@ -208,13 +209,13 @@
 }
 
 .sysmon-popup-menu.sysmon-compact .sysmon-popup-header {
-    gap: 4px;
+    spacing: 4px;
     padding: 0px;
     border-bottom: 1px solid rgba(128,128,128,0.22);
 }
 
 .sysmon-popup-menu.sysmon-compact .sysmon-metric-card {
-    gap: 8px;
+    spacing: 8px;
     padding: 0px;
     margin: 0px;
     min-height: 0;
@@ -235,7 +236,7 @@
 }
 
 .sysmon-popup-menu.sysmon-compact .sysmon-metric-body {
-    gap: 0;
+    spacing: 0;
     padding-right: 4px;
 }
 
@@ -248,12 +249,12 @@
 }
 
 .sysmon-popup-menu.sysmon-compact .sysmon-metric-side {
-    gap: 2px;
+    spacing: 2px;
     min-width: 74px;
 }
 
 .sysmon-popup-menu.sysmon-compact .sysmon-metric-stats {
-    gap: 6px;
+    spacing: 6px;
 }
 
 .sysmon-popup-menu.sysmon-compact .sysmon-metric-temp,
@@ -262,12 +263,12 @@
 }
 
 .sysmon-popup-menu.sysmon-compact .sysmon-net-grid {
-    gap: 0;
+    spacing: 0;
     padding: 0;
 }
 
 .sysmon-popup-menu.sysmon-compact .sysmon-net-card {
-    gap: 2px;
+    spacing: 2px;
     padding: 0px;
     min-height: 0;
     border-radius: 0;
