@@ -724,7 +724,6 @@ class Indicator extends PanelMenu.Button {
 
         this._buildPopup();
         this.menu.actor.add_style_class_name('sysmon-popup-menu');
-        this.menu.actor.set_width(360);
         this._syncCompactMode();
         this._syncVisibility();
     }
@@ -737,10 +736,9 @@ class Indicator extends PanelMenu.Button {
             else
                 actor.remove_style_class_name('sysmon-compact');
         }
-        this.menu.actor.set_width(compact ? 320 : 360);
         this._chevron.visible = !compact;
 
-        for (const card of [this._upCard, this._downCard]) {
+         for (const card of [this._upCard, this._downCard]) {
             const height = compact ? 24 : 52;
             card.wave._chartHeight = height;
             card.wave.set_height(height);
@@ -749,12 +747,12 @@ class Indicator extends PanelMenu.Button {
 
         for (const card of [this._cpuItem, this._gpuItem, this._ramItem, this._swapItem]) {
             const width = compact ? 72 : 108;
-            const height = compact ? 20 : 30;
+            const height = compact ? 10 : 30;
             card.sparkline._chartWidth = width;
             card.sparkline._chartHeight = height;
             card.sparkline.set_size(width, height);
             card.sparkline.queue_repaint();
-        }
+        } 
     }
 
     _buildPopup() {

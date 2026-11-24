@@ -205,13 +205,14 @@
 }
 
 .sysmon-popup-menu.sysmon-compact {
+    spacing: 0px;
     padding: 0px;
+    margin: 0px;
 }
 
 .sysmon-popup-menu.sysmon-compact .sysmon-popup-header {
     spacing: 4px;
     padding: 0px;
-    border-bottom: 1px solid rgba(128,128,128,0.22);
 }
 
 .sysmon-popup-menu.sysmon-compact .sysmon-metric-card {
@@ -263,7 +264,7 @@
 }
 
 .sysmon-popup-menu.sysmon-compact .sysmon-net-grid {
-    spacing: 0;
+    spacing: 8px;
     padding: 0;
 }
 
